@@ -1,21 +1,49 @@
 import 'package:cws_unpause/main.dart';
+import 'package:cws_unpause/ui/songPlayerPage/song_list.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:spotify_sdk/spotify_sdk.dart';
 
 class SongHomePage extends StatefulWidget {
+  int songNo;
+  SongHomePage({this.songNo});
+
   @override
   _SongHomePageState createState() => _SongHomePageState();
 }
 
 class _SongHomePageState extends State<SongHomePage> {
   PageController controller = PageController();
-  double seeker = .5;
+  double seeker = 0;
   int tab = 1;
   bool liked = false;
+  final String clientId = 'a885f1b35dd44613bcec4d2d72e23ff4';
+  final String clientSecret = 'b59fb2ccf4824ecc8fb1bc4ecbea6c0a';
+  final String redirectUrl = 'https://open.spotify.com/';
+  String isPlaying = 'false';
+
+
+  Future<void> loadMusic() async {
+    await SpotifySdk.connectToSpotifyRemote(clientId: clientId, redirectUrl: redirectUrl);
+    var authenticationToken = await SpotifySdk.getAuthenticationToken(
+        clientId: clientId, redirectUrl: redirectUrl, scope: "app-remote-control,user-modify-playback-state,playlist-read-private");
+    print(authenticationToken);
+    if(authenticationToken.isNotEmpty) {
+      SpotifySdk.play(spotifyUri: songs[widget.songNo]);
+      setState(() {
+        isPlaying = 'true';
+        //seeker = SpotifySdk.subscribePlayerState()
+      });
+    }
+    else {
+      print('Authentication failed');
+    }
+  }
 
   @override
   void initState() {
+    loadMusic();
     super.initState();
     controller = PageController(
       initialPage: 1,
@@ -393,11 +421,11 @@ class _SongHomePageState extends State<SongHomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "3:00",
+                    "0:00",
                     style: TextStyle(color: Colors.white),
                   ),
                   Text(
-                    "6:00",
+                    "4:00",
                     style: TextStyle(color: Colors.white),
                   ),
                 ],
@@ -419,9 +447,29 @@ class _SongHomePageState extends State<SongHomePage> {
                     "assets/back.png",
                     height: 20,
                   ),
-                  Image.asset(
-                    "assets/playPink.png",
-                    height: 75,
+                  InkWell(
+                    onTap: () async {
+                      if(isPlaying == 'true') {
+                        await SpotifySdk.pause();
+                        setState(() {
+                          isPlaying = 'false';
+                        });
+                      }
+                      else {
+                        await SpotifySdk.resume();
+                        setState(() {
+                          isPlaying = 'true';
+                        });
+                      }
+                    },
+                    child: isPlaying == 'false' ? Image.asset(
+                      "assets/playPink.png",
+                      height: 75,
+                    ) :
+                    Image.asset(
+                      "assets/pause.png",
+                      height: 75,
+                    ),
                   ),
                   Image.asset(
                     "assets/next.png",
@@ -522,9 +570,30 @@ class _SongHomePageState extends State<SongHomePage> {
                         "assets/back.png",
                         height: 20,
                       ),
-                      Image.asset(
-                        "assets/playPink.png",
-                        height: 75,
+                      InkWell(
+                        onTap: () async {
+                          print(isPlaying);
+                          if(isPlaying == 'true') {
+                            await SpotifySdk.pause();
+                            setState(() {
+                              isPlaying = 'false';
+                            });
+                          }
+                          else {
+                            await SpotifySdk.resume();
+                            setState(() {
+                              isPlaying = 'true';
+                            });
+                          }
+                        },
+                        child: isPlaying == 'false' ? Image.asset(
+                          "assets/playPink.png",
+                          height: 75,
+                        ) :
+                        Image.asset(
+                          "assets/pause.png",
+                          height: 75,
+                        ),
                       ),
                       Image.asset(
                         "assets/next.png",

@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int tab = 0;
   bool show = false;
+  int songNo;
   String appBarName = "UnPause";
 
 
@@ -385,8 +386,13 @@ class _HomePageState extends State<HomePage> {
                         return InkWell(
                           onTap: () {
                             setState(() {
+                              songNo = index;
                               show = !show;
                             });
+                            print(songNo);
+                            // Navigator.push(context, MaterialPageRoute(
+                            //   builder: (context) => SongHomePage(songNo: songNo,),
+                            // ));
                           },
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(25, 8, 25, 5),
@@ -450,10 +456,11 @@ class _HomePageState extends State<HomePage> {
               child: show
                   ? InkWell(
                       onTap: () {
+                        print('Song No:- $songNo');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SongHomePage(),
+                            builder: (context) => SongHomePage(songNo: songNo,),
                           ),
                         );
                       },
